@@ -77,36 +77,25 @@ router.delete("/:id", validateUserId, (req, res) => {
     });
 });
 
+// UPDATE & put new user changes in the database
 router.put("/:id", validateUserId, (req, res) => {
-  // do your magic!
+  const changes = req.body;
+  const updatedUser = req.params.id;
+
+  if (!changes.name) {
+    res.status(400).json({ message: "Please provide name" });
+  }
+  UserDb.update(updatedUser, changes)
+    .then((count) => {
+      if (count > 0) {
+        res.status(200).json({ count, message: "user successfully updated" });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ error: "user could not be updated" });
+    });
 });
-
-// router.put("/:id", (req, res) => {
-//   const changes = req.body;
-
-//   if (!changes.title || !changes.contents) {
-//     res.status(400).json({
-//       errorMessage: "Please provide title and contents for the post.",
-//     });
-//   }
-//   blogpost
-//     .update(req.params.id, changes)
-//     .then((post) => {
-//       if (post) {
-//         res.status(200).json(post);
-//       } else {
-//         res
-//           .status(404)
-//           .json({ message: "The post with the specified ID does not exist." });
-//       }
-//     })
-//     .catch((error) => {
-//       console.log(error);
-//       res
-//         .status(500)
-//         .json({ error: "The post information could not be modified." });
-//     });
-// });
 
 //custom middleware
 
