@@ -1,47 +1,158 @@
-const express = require('express');
+const express = require("express");
+
+const UserDb = require("../users/userDb.js");
+const PostDb = require("../posts/postDb.js");
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
+// CREATE & post new user *** working
+router.post("/", validateUser, (req, res) => {
+  UserDb.insert(req.body)
+    .then((user) => {
+      res.status(201).json({ user });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ error: "error adding new user" });
+    });
+});
+
+// CREATE & post new post to specific user *** working
+router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
+  PostDb.insert(req.body)
+    .then((post) => {
+      res.status(201).json({ post });
+    })
+    .catch((error) => {
+      console.log((error) => {
+        res.status(500).json({ error: "error adding new post" });
+      });
+    });
+});
+
+// READ & get list of users *** working
+router.get("/", (req, res) => {
+  UserDb.get()
+    .then((userList) => {
+      res.status(200).json({ userList });
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
+// READ & get specific user *** working
+router.get("/:id", validateUserId, (req, res) => {
+  const validUser = req.user;
+  res.status(200).json({ validUser });
+});
+
+// READ & get list of specific user's posts *** working
+router.get("/:id/posts", validateUserId, (req, res) => {
+  userDb
+    .getUserPosts(req.user.id)
+    .then((posts) => [res.status(200).json({ posts })])
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ error: "error retrieving posts" });
+    });
+});
+
+// DELETE specific user *** working
+router.delete("/:id", validateUserId, (req, res) => {
+  const deleteUser = req.params.id;
+  UserDb.remove(deleteUser)
+    .then((count) => {
+      if (count > 0) {
+        res.status(200).json({ message: "user successfully deleted" });
+      } else {
+        res
+          .status(404)
+          .json({ message: "user with the specified ID does not exist" });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ error: "user could not be removed" });
+    });
+});
+
+router.put("/:id", validateUserId, (req, res) => {
   // do your magic!
 });
 
-router.post('/:id/posts', (req, res) => {
-  // do your magic!
-});
+// router.put("/:id", (req, res) => {
+//   const changes = req.body;
 
-router.get('/', (req, res) => {
-  // do your magic!
-});
-
-router.get('/:id', (req, res) => {
-  // do your magic!
-});
-
-router.get('/:id/posts', (req, res) => {
-  // do your magic!
-});
-
-router.delete('/:id', (req, res) => {
-  // do your magic!
-});
-
-router.put('/:id', (req, res) => {
-  // do your magic!
-});
+//   if (!changes.title || !changes.contents) {
+//     res.status(400).json({
+//       errorMessage: "Please provide title and contents for the post.",
+//     });
+//   }
+//   blogpost
+//     .update(req.params.id, changes)
+//     .then((post) => {
+//       if (post) {
+//         res.status(200).json(post);
+//       } else {
+//         res
+//           .status(404)
+//           .json({ message: "The post with the specified ID does not exist." });
+//       }
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//       res
+//         .status(500)
+//         .json({ error: "The post information could not be modified." });
+//     });
+// });
 
 //custom middleware
 
 function validateUserId(req, res, next) {
-  // do your magic!
+  const id = req.params.id;
+  UserDb.getById(id)
+    .then((user) => {
+      if (!user) {
+        res.status(400).json({ message: "invalid user id" });
+      } else {
+        req.user = user;
+        next();
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({
+        error: "There was an error retrieving the user from the database",
+      });
+    });
 }
 
 function validateUser(req, res, next) {
-  // do your magic!
+  const body = req.body;
+  if (!body) {
+    res.status(400).json({ message: "missing user data" });
+  } else {
+    if (!body.name) {
+      res.status(400).json({ message: "missing required name field" });
+    } else {
+      next();
+    }
+  }
 }
 
 function validatePost(req, res, next) {
-  // do your magic!
+  const body = req.body;
+  if (!body) {
+    res.status(400).json({ message: "missing post data" });
+  } else {
+    if (!body.text) {
+      res.status(400).json({ message: "missing required text field" });
+    } else {
+      next();
+    }
+  }
 }
 
 module.exports = router;
