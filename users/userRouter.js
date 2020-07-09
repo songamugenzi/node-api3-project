@@ -97,7 +97,7 @@ router.put("/:id", validateUserId, (req, res) => {
     });
 });
 
-//custom middleware
+// CUSTOM MIDDLEWARE
 
 function validateUserId(req, res, next) {
   const id = req.params.id;
