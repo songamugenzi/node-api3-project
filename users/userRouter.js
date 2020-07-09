@@ -49,7 +49,7 @@ router.get("/:id", validateUserId, (req, res) => {
 
 // READ & get list of specific user's posts *** working
 router.get("/:id/posts", validateUserId, (req, res) => {
-  userDb
+  UserDb
     .getUserPosts(req.user.id)
     .then((posts) => [res.status(200).json({ posts })])
     .catch((error) => {
