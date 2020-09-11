@@ -5,7 +5,7 @@ const PostDb = require("../posts/postDb.js");
 
 const router = express.Router();
 
-// CREATE & post new user *** working
+// CREATE & post new user //
 router.post("/", validateUser, (req, res) => {
   UserDb.insert(req.body)
     .then((user) => {
@@ -17,7 +17,7 @@ router.post("/", validateUser, (req, res) => {
     });
 });
 
-// CREATE & post new post to specific user *** working
+// CREATE & post new post to specific user //
 router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
   PostDb.insert(req.body)
     .then((post) => {
@@ -30,7 +30,7 @@ router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
     });
 });
 
-// READ & get list of users *** working
+// READ & get list of users //
 router.get("/", (req, res) => {
   UserDb.get()
     .then((userList) => {
@@ -41,13 +41,13 @@ router.get("/", (req, res) => {
     });
 });
 
-// READ & get specific user *** working
+// READ & get specific user //
 router.get("/:id", validateUserId, (req, res) => {
   const validUser = req.user;
   res.status(200).json({ validUser });
 });
 
-// READ & get list of specific user's posts *** working
+// READ & get list of specific user's posts //
 router.get("/:id/posts", validateUserId, (req, res) => {
   UserDb
     .getUserPosts(req.user.id)
@@ -58,7 +58,7 @@ router.get("/:id/posts", validateUserId, (req, res) => {
     });
 });
 
-// DELETE specific user *** working
+// DELETE specific user //
 router.delete("/:id", validateUserId, (req, res) => {
   const deleteUser = req.params.id;
   UserDb.remove(deleteUser)
@@ -77,7 +77,7 @@ router.delete("/:id", validateUserId, (req, res) => {
     });
 });
 
-// UPDATE & put new user changes in the database
+// UPDATE & put new user changes in the database //
 router.put("/:id", validateUserId, (req, res) => {
   const changes = req.body;
   const updatedUser = req.params.id;
@@ -97,7 +97,7 @@ router.put("/:id", validateUserId, (req, res) => {
     });
 });
 
-// CUSTOM MIDDLEWARE
+// CUSTOM MIDDLEWARE //
 
 function validateUserId(req, res, next) {
   const id = req.params.id;
@@ -136,8 +136,8 @@ function validatePost(req, res, next) {
   if (!body) {
     res.status(400).json({ message: "missing post data" });
   } else {
-    if (!body.text) {
-      res.status(400).json({ message: "missing required text field" });
+    if (!body.text || !body.user_id) {
+      res.status(400).json({ message: "missing required fields" });
     } else {
       next();
     }
