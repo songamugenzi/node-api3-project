@@ -8,9 +8,8 @@ const router = express.Router();
 router.use(express.json());
 
 router.get("/", (req, res) => {
-  const message = process.env.MESSAGE;
-
-  res.status(200).json({ message });
+  const motd = process.env.MOTD || "Hello World!";
+  res.status(200).json({ api: "up", motd: motd });
 });
 
 router.use("/users", userRouter);
